@@ -1,39 +1,98 @@
-//PHP
-Q1)
-//HTML File
-<html>
-<form action=slip29.php method=get>
-Enter Event Name:<input type=text name=t1><br>
-<input type=submit value="Change Status">
-</form>
-</html>
+Q1
+#include<stdlib.h>
+#include<mpi.h>
 
-//PHP File
-<?php
-$con=pg_connect("host=localhost user=postgres password=nrc bname=practicals22");
-//echo $con;
-$en=$_GET['t1'];
-$ws='Working';
-$x=pg_query($con,"update comm_mem set cstatus='$ws' from event_comm,event
-where comm_mem.cno=event_comm.cno and event_comm.eno=event.eno and
-etitle='$en'");
-if($x>0)
- echo "Working status updated";
-else
- echo "Status not updated";
- ?>
+#define ARRAY_SIZE 10
+
+int main(int argc,char*argv[])
+{
+int rank,size;
+int i,sum=0;
+int data[ARRAY_SIZE];
+
+MPI_Init(&argc,&argv);
+MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+MPI_Comm_size(MPI_COMM_WORLD,&size);
+
+if(rank==0)
+{
+ printf("Generating random data...\n");
+for(i=0;i<ARRAY_SIZE;i++)
+{
+data[i]=rand()%100;
+printf("The array is:%d\n",data[i]);
+}
+}
+int chunk_size=ARRAY_SIZE;
+int *chunk=(int*)malloc(chunk_size*sizeof(int));
+
+MPI_Scatter(data,chunk_size,MPI_INT,chunk,chunk_size,MPI_INT,0,MPI_COMM_WORLD);
 
 
+int local_sum=0;
+for(i=0;i<chunk_size;i++)
+{
+local_sum +=data[i];
+printf("The local sum is:%d\n",local_sum);
+}
+
+MPI_Reduce(&local_sum,&sum,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
+
+if(rank==0)
+{
+printf("The final sum is:%d\n",sum);
+}
+free(chunk);
+MPI_Finalize():
+return 0;
+}
 
 
+Q2
+#include<stdlib.h>
+#include<mpi.h>
+
+#define ARRAY_SIZE 10
+
+int main(int argc,char*argv[])
+{
+int rank,size;
+int i,sum=0;
+int data[ARRAY_SIZE];
+
+MPI_Init(&argc,&argv);
+MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+MPI_Comm_size(MPI_COMM_WORLD,&size);
+
+if(rank==0)
+{ 
+ printf("Generating random data...\n");
+for(i=0;i<ARRAY_SIZE;i++)
+{
+data[i]=rand()%100;
+printf("The array is:%d\n",data[i]);
+}
+}
+int chunk_size=ARRAY_SIZE;
+int *chunk=(int*)malloc(chunk_size*sizeof(int));
+
+MPI_Scatter(data,chunk_size,MPI_INT,chunk,chunk_size,MPI_INT,0,MPI_COMM_WORLD);
 
 
-//DS
-Q2) 
-import pandas as p
-from sklearn import preprocessing
- d = pd.read_csv('D:\\yogita\\Data.csv')
-label_encoder = preprocessing.LabelEncoder()
- d['purchased']= label_encoder.fit_transform(d['purchased'])
-one_hot_encoded_data = p.get_dummies(d, columns = ['country'])
-print(one_hot_encoded_data)
+int local_sum=0;
+for(i=0;i<chunk_size;i++)
+{
+local_sum +=data[i];
+printf("The local sum is:%d\n",local_sum);
+}
+
+MPI_Reduce(&local_sum,&sum,1,MPI_INT,MPI_SUM,0,MPI_COMM_WORLD);
+
+if(rank==0)
+{
+printf("The final sum is:%d\n",sum);
+}
+free(chunk);
+MPI_Finalize():
+return 0;
+}
